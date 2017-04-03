@@ -1,7 +1,6 @@
 package at.grahsl.junit.jupiter.params.provider;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
@@ -42,6 +41,19 @@ public class DemoJsonParameterizedTest {
                 "{\"myString\":\"Json Param Source\",\"myNumbers\":[9,8,7,6],\"myBoolean\":true}"},
                 clazz = DemoDtoA.class)
     void testWithJsonSourceParamMapping(DemoDtoA obj) {
+
+        assertAll("obj param checks",
+                () -> assertNotNull(obj),
+                () -> assertNotNull(obj.myString),
+                () -> assertFalse(obj.myString.isEmpty()),
+                () -> assertTrue(obj.myBoolean)
+        );
+
+    }
+
+    @ParameterizedTest
+    @JsonFileSource(resources = {"/demo.json"}, clazz = DemoDtoA.class)
+    void testWithJsonFileSourceParamMapping(DemoDtoA obj) {
 
         assertAll("obj param checks",
                 () -> assertNotNull(obj),
