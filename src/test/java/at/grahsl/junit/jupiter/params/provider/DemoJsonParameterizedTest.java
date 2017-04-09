@@ -1,5 +1,8 @@
 package at.grahsl.junit.jupiter.params.provider;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
@@ -35,6 +38,47 @@ public class DemoJsonParameterizedTest {
         }
     }
 
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = DemoDtoB.class, name = "DemoDtoB"),
+            @JsonSubTypes.Type(value = DemoDtoC.class, name = "DemoDtoC")
+    })
+    public interface TypeWrapper {}
+
+    @JsonRootName("DemoDtoB")
+    public static class DemoDtoB implements TypeWrapper {
+
+        public double myNumber;
+        public String someText;
+
+        public DemoDtoB() {}
+
+        @Override
+        public String toString() {
+            return "DemoDtoB{" +
+                    "myNumber=" + myNumber +
+                    ", someText='" + someText + '\'' +
+                    '}';
+        }
+    }
+
+    @JsonRootName("DemoDtoC")
+    public static class DemoDtoC implements TypeWrapper {
+
+        public boolean myBoolean;
+        public int myNumber;
+
+        public DemoDtoC() {}
+
+        @Override
+        public String toString() {
+            return "DemoDtoC{" +
+                    "myBoolean=" + myBoolean +
+                    ", myNumber=" + myNumber +
+                    '}';
+        }
+    }
+
     @ParameterizedTest
     @JsonSource(records = {
                 "{\"myString\":\"junit5 rocks!\",\"myNumbers\":[1,2,3,4],\"myBoolean\":true}",
@@ -60,6 +104,28 @@ public class DemoJsonParameterizedTest {
                 () -> assertNotNull(obj.myString),
                 () -> assertFalse(obj.myString.isEmpty()),
                 () -> assertTrue(obj.myBoolean)
+        );
+
+    }
+
+    @ParameterizedTest
+    @JsonMultiTypeSource(records = {
+            "[{\"DemoDtoB\": {\"myNumber\":12.23,\"someText\":\"foo FOO\"}}," +
+                    "{\"DemoDtoC\": {\"myBoolean\":true,\"myNumber\":-123}}]",
+            "[{\"DemoDtoB\": {\"myNumber\":43.54,\"someText\":\"foo FOO\"}}," +
+                    "{\"DemoDtoC\": {\"myBoolean\":true,\"myNumber\":-987}}]"
+    },
+            clazz = TypeWrapper.class
+    )
+    void testWithJsonMultiTypeSourceParamMapping(DemoDtoB obj1, DemoDtoC obj2) {
+
+        assertAll("obj param checks",
+                () -> assertNotNull(obj1),
+                () -> assertTrue(obj1.myNumber >= 0),
+                () -> assertFalse(obj1.someText.isEmpty()),
+                () -> assertNotNull(obj2),
+                () -> assertEquals(true,obj2.myBoolean),
+                () -> assertTrue(obj2.myNumber <= 0)
         );
 
     }
