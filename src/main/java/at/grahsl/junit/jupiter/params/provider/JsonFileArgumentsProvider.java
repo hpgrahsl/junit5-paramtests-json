@@ -2,10 +2,9 @@ package at.grahsl.junit.jupiter.params.provider;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.extension.ContainerExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.junit.jupiter.params.support.AnnotationConsumer;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.util.Preconditions;
@@ -40,7 +39,7 @@ public class JsonFileArgumentsProvider implements
 
         @Override
         public Arguments next() {
-            return ObjectArrayArguments.create(iterator.next());
+            return Arguments.of(iterator.next());
         }
     }
 
@@ -64,14 +63,14 @@ public class JsonFileArgumentsProvider implements
     }
 
     @Override
-    public Stream<? extends Arguments> arguments(ContainerExtensionContext context) {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
         return Arrays.stream(resources)
                 .map(resource -> openInputStream(context, resource))
                 .map(this::getJsonParserIterator)
                 .flatMap(this::toStream);
     }
 
-    private InputStream openInputStream(ContainerExtensionContext context, String resource) {
+    private InputStream openInputStream(ExtensionContext context, String resource) {
         Class<?> testClass = context.getTestClass().orElseThrow(
                 () -> new JUnitException("Cannot load classpath resource without test class"));
         return Preconditions.notNull(inputStreamProvider.apply(testClass, resource),

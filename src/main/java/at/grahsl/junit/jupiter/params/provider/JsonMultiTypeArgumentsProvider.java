@@ -2,10 +2,9 @@ package at.grahsl.junit.jupiter.params.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.ArrayType;
-import org.junit.jupiter.api.extension.ContainerExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.junit.jupiter.params.support.AnnotationConsumer;
 
 import java.util.Arrays;
@@ -27,10 +26,10 @@ public class JsonMultiTypeArgumentsProvider implements ArgumentsProvider, Annota
     }
 
     @Override
-    public Stream<? extends Arguments> arguments(ContainerExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
         return Arrays.stream(records)
                 .map(this::parseJsonObjectArray)
-                .map(ObjectArrayArguments::create);
+                .map(Arguments::of);
     }
 
     private Object[] parseJsonObjectArray(String json) {
