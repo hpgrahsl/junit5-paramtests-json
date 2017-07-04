@@ -1,10 +1,9 @@
 package at.grahsl.junit.jupiter.params.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.extension.ContainerExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.junit.jupiter.params.support.AnnotationConsumer;
 
 import java.io.IOException;
@@ -25,10 +24,10 @@ public class JsonArgumentsProvider implements ArgumentsProvider, AnnotationConsu
     }
 
     @Override
-    public Stream<? extends Arguments> arguments(ContainerExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
         return Arrays.stream(records)
                     .map(this::parseJsonString)
-                    .map(ObjectArrayArguments::create);
+                    .map(Arguments::of);
     }
 
     private Object parseJsonString(String json) {
